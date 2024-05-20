@@ -21,6 +21,7 @@ type NSStruct struct {
 	IPv4s []string `json:"ipv4s"`
 	IPv6s []string `json:"ipv6s"`
 }
+
 type ZoneNSStruct struct {
 	Zone string     `json:"zone"`
 	NSes []NSStruct `json:"nses"`
@@ -64,12 +65,25 @@ func initZoneNSMap(file string) {
 }
 
 func dnsResponseL(
-	srcMac string, dstMac string, srcIP string, srcPort layers.UDPPort, dstIP string, dstPort layers.UDPPort,
-	qname string, qtype layers.DNSType, txid uint16, ttl uint32,
+	srcMac string,
+	dstMac string,
+	srcIP string,
+	srcPort layers.UDPPort,
+	dstIP string,
+	dstPort layers.UDPPort,
+	qname string,
+	qtype layers.DNSType,
+	txid uint16,
+	ttl uint32,
 ) {
-
 	fmt.Printf(
-		"%s : fm %s:%d to %s:%d query %s %s\n", time.Now().Format(time.ANSIC), dstIP, dstPort, srcIP, srcPort, qname,
+		"%s : fm %s:%d to %s:%d query %s %s\n",
+		time.Now().Format(time.ANSIC),
+		dstIP,
+		dstPort,
+		srcIP,
+		srcPort,
+		qname,
 		qtype.String(),
 	)
 
@@ -262,8 +276,15 @@ func dnsResponseL(
 	}
 
 	fmt.Printf(
-		"%s : from %s:%d to %s:%d with %s %s %d\n", time.Now().Format(time.ANSIC), srcIP, srcPort, dstIP, dstPort,
-		qname, qtype.String(), ttl,
+		"%s : from %s:%d to %s:%d with %s %s %d\n",
+		time.Now().Format(time.ANSIC),
+		srcIP,
+		srcPort,
+		dstIP,
+		dstPort,
+		qname,
+		qtype.String(),
+		ttl,
 	)
 }
 
@@ -294,7 +315,7 @@ func main() {
 	}
 	defer handleRecv.Close()
 
-	var filter = fmt.Sprintf("udp dst port 53")
+	filter := fmt.Sprintf("udp dst port 53")
 	errP = handleRecv.SetBPFFilter(filter)
 	if errP != nil {
 		fmt.Println("Error: ", errP)
@@ -349,6 +370,17 @@ func main() {
 		txid := dns_.ID
 		ttl := ttlL
 
-		go dnsResponseL(srcMac, dstMac, srcIP, srcPort, dstIP, dstPort, qname, qtype, txid, uint32(ttl))
+		go dnsResponseL(
+			srcMac,
+			dstMac,
+			srcIP,
+			srcPort,
+			dstIP,
+			dstPort,
+			qname,
+			qtype,
+			txid,
+			uint32(ttl),
+		)
 	}
 }
