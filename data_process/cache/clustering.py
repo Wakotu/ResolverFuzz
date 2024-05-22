@@ -1,10 +1,18 @@
+import argparse
 import os
 
 from cache_analyzer import CacheAnalyzer
 
+arg_parser = argparse.ArgumentParser(description="Analyze the cache data.")
+arg_parser.add_argument(
+    "--res_folder",
+    type=str,
+    help="The folder containing the cache data.",
+)
+args = arg_parser.parse_args()
 ########################################################################################################################
 
-res_folder_path = '/home/xuesong/proj/ResolverFuzz/test_infra/cdns_test_res'
+res_folder_path = args.res_folder
 
 # Forward-only mode
 count_overall = {}
@@ -45,8 +53,14 @@ try:
                                 pos += 1
 except KeyboardInterrupt:
     pass
-print("\n", '^' * 20, "Exiting...")
-print("In the total of " + str(total) + ", there are " + str(pos) + " data points with diff cache.")
+print("\n", "^" * 20, "Exiting...")
+print(
+    "In the total of "
+    + str(total)
+    + ", there are "
+    + str(pos)
+    + " data points with diff cache."
+)
 
 ########################################################################################################################
 
@@ -60,17 +74,17 @@ for i in index_target:
     test = CacheAnalyzer(directory=i[0], index=i[1])
     res_count.append(test.calc_count())
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from sklearn.cluster import KMeans, BisectingKMeans
-from sklearn.metrics import silhouette_score, calinski_harabasz_score
-import matplotlib.pyplot as plt
+from sklearn.cluster import BisectingKMeans, KMeans
+from sklearn.metrics import calinski_harabasz_score, silhouette_score
 
 df = pd.DataFrame(res_count)
 
 ########################################################################################################################
 # choose k
-SSE = [] # sum of squared error (SSE)
+SSE = []  # sum of squared error (SSE)
 Scores_CH = []  # calinski_harabasz_score
 for k in range(2, 50):
     estimator = KMeans(n_clusters=k)
@@ -84,26 +98,26 @@ for k in range(2, 50):
 # plt.show()
 X = range(2, 22)
 plt.figure(figsize=(14, 7))
-plt.xlabel('k', fontsize=24, weight='bold')
-plt.ylabel('SSE', fontsize=24, weight='bold')
-plt.plot(X, SSE[:20], 'o-')
+plt.xlabel("k", fontsize=24, weight="bold")
+plt.ylabel("SSE", fontsize=24, weight="bold")
+plt.plot(X, SSE[:20], "o-")
 # plt.xticks(range(2,22), fontsize=24)
 # plt.yticks(range(0, 40050, 5000), fontsize=24)
 # plt.axis([1, 22, -50, 40050])
 # plt.annotate(text='K selected', xy=(7, SSE[6]), xytext=(9, 20000), fontsize=28, weight='bold', color='r', arrowprops=dict(facecolor='c', shrink=0.01))
 plt.show()
 
-plt.savefig("k_means.pdf", dpi=500, bbox_inches='tight')
+plt.savefig("k_means.pdf", dpi=500, bbox_inches="tight")
 
 X = range(2, 50)
-plt.xlabel('k')
-plt.ylabel('calinski_harabasz_score')
-plt.plot(X, Scores_CH, 'o-')
+plt.xlabel("k")
+plt.ylabel("calinski_harabasz_score")
+plt.plot(X, Scores_CH, "o-")
 plt.show()
 X = range(2, 22)
-plt.xlabel('k')
-plt.ylabel('calinski_harabasz_score')
-plt.plot(X, Scores_CH[:20], 'o-')
+plt.xlabel("k")
+plt.ylabel("calinski_harabasz_score")
+plt.plot(X, Scores_CH[:20], "o-")
 plt.show()
 
 # choose k using Silhouette Coefficient
@@ -111,16 +125,16 @@ Scores = []
 for k in range(2, 100):
     estimator = KMeans(n_clusters=k)
     estimator.fit(np.array(df))
-    Scores.append(silhouette_score(np.array(df), estimator.labels_, metric='euclidean'))
+    Scores.append(silhouette_score(np.array(df), estimator.labels_, metric="euclidean"))
 X = range(2, 100)
-plt.xlabel('k')
-plt.ylabel('Silhouette Coefficient')
-plt.plot(X, Scores, 'o-')
+plt.xlabel("k")
+plt.ylabel("Silhouette Coefficient")
+plt.plot(X, Scores, "o-")
 plt.show()
 X = range(2, 22)
-plt.xlabel('k')
-plt.ylabel('Silhouette Coefficient')
-plt.plot(X, Scores[:20], 'o-')
+plt.xlabel("k")
+plt.ylabel("Silhouette Coefficient")
+plt.plot(X, Scores[:20], "o-")
 plt.show()
 
 ########################################################################################################################
@@ -153,6 +167,8 @@ for i in range(n_cluster):
 
 cluster_res = [[] for i in range(n_cluster)]
 for i in range(len(cluster.labels_)):
-    cluster_res[cluster.labels_[i]].append(CacheAnalyzer(directory=index_target[i][0], index=index_target[i][1]))
+    cluster_res[cluster.labels_[i]].append(
+        CacheAnalyzer(directory=index_target[i][0], index=index_target[i][1])
+    )
 
 ########################################################################################################################

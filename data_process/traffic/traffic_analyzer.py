@@ -4,12 +4,13 @@ from scapy.layers.dns import DNS
 from scapy.layers.inet import IP
 from scapy.utils import PcapReader
 
-resolver_ip_list = {'172.22.', '172.17.'}
+resolver_ip_list = {"172.22.", "172.17."}
 
 # By default, each docker container will has two network interface, one with the network we created, and one with the default docker network.
 # The default docker network is using IP range 172.17.0.x
 # The network we created is using IP range 172.22.x.x
 # So here we use this to distinguish the traffic between `client and resolver` and between `resolver and upstream server`.
+
 
 def parse_pcap(filepath: str):
     if os.path.exists(filepath) and os.path.isfile(filepath):
@@ -36,7 +37,9 @@ class TrafficAnalyzer:
         packets = parse_pcap(self.filepath)
         if packets:
             for packet in packets:
-                if not (not packet.haslayer(DNS) and not self.count_handshake) and packet.haslayer(IP):
+                if not (
+                    not packet.haslayer(DNS) and not self.count_handshake
+                ) and packet.haslayer(IP):
                     if packet[IP].dst[:11] == "172.22.101.":
                         self.client_send["packets"].append(packet)
                         self.client_send["count"] += 1
@@ -61,9 +64,16 @@ class TrafficAnalyzer:
                         self.up_stream_recv["packets"].append(packet)
                         self.up_stream_recv["count"] += 1
                         self.up_stream_recv["size"] += packet.payload.len
-            self.ratio_count = self.client_send['count'] + self.up_stream_send['count'] + self.up_stream_recv['count']
-            if len(self.client_recv['packets']) > 0:
-                self.ratio_size = (self.client_send['size'] + self.up_stream_send['size'] + self.up_stream_recv[
-                    'size']) / self.client_recv['size']
+            self.ratio_count = (
+                self.client_send["count"]
+                + self.up_stream_send["count"]
+                + self.up_stream_recv["count"]
+            )
+            if len(self.client_recv["packets"]) > 0:
+                self.ratio_size = (
+                    self.client_send["size"]
+                    + self.up_stream_send["size"]
+                    + self.up_stream_recv["size"]
+                ) / self.client_recv["size"]
         else:
             self.is_valid = False
