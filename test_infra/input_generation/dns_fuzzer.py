@@ -1,14 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-"""
-@File    :   dns_fuzzer.py
-@Contact :   
-@License :   (C)Copyright 2022
-
-@Modify Time        @Author     @Version    @Description
-----------------    --------    --------    -----------
-30/6/2022 12:54     idealeer    0.0         None
-"""
 import ipaddress
 import json
 import random
